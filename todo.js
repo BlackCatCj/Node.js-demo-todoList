@@ -13,12 +13,15 @@ const content2 = process.argv[4]
 
 
 
+
 // 优化重复代码部分
 
 // 注意这里路径要用\\ 因为\是字符转义，会让路径出错，所以要用\\表示\
 // db 数据库  是没有后缀的
 // Sync是同步的意思  writeFileSync就是以同步的方式写入文件（没有则新建一个文件）
 const dbPath = 'D:\\VSCodeProject\\Node-demo\\db'
+
+
 
 // 保存到数据库db
 function save(list) {
@@ -29,12 +32,20 @@ function save(list) {
     fs.writeFileSync(dbPath, JSON.stringify(list)) //保存到数据库
 }
 
-// 读取数据库db
+// 读取数据库db的内容
 function fetch() {
     // 一个list数组充当任务列表
     // 首先先读取db中已有的数据，存入list中，以免内容被覆盖
     const readFileContent = fs.readFileSync(dbPath).toString()
-    const list = JSON.parse(readFileContent); //反序列化 将字符串转成数组
+    let list   //这里不能用const声明，因为const必须赋值，let不用
+    try {
+        //这种写法是兜底值，意思是当前面的反序列化出错（文件为空时就没法反序列化），那么就赋值list为[]空数组
+        list = JSON.parse(readFileContent) || []
+    } catch (error) {  //如果出错则将list赋值为[]空数组
+        list = []
+    }
+    //反序列化 将字符串转成数组
+
     return list
 }
 
@@ -45,6 +56,7 @@ function display(list) {
 
 // 向list中添加数据
 function addContent(list, content) {
+    // 把content数组添加进list列表中 因为list是数组，所以只有数组能push进去，字符串不行
     list.push([content, '未完成'])
 }
 
@@ -64,60 +76,65 @@ function markContentDone(list, n) {
 function editContent(list, n, newContent) {
     list[n - 1][0] = newContent
 }
-// 优化重复代码部分
+
+// 检查db数据文件是否存在，不存在则新建一个
+// try——>尝试运行代码，报错则运行catch中的代码
+try {
+    fs.statSync(dbPath)
+} catch (error) {
+    fs.writeFileSync(dbPath, '')
+}
+// 运行完try之后，db文件必定已经存在
+
+
+//提前声明，防止后面重复声明list
+//提前运行fetch()函数，读取数据给list，减少每项操作的重复动作
+const list = fetch()
 
 
 
 switch (verb) {
     case 'add':
-        // 检查db数据文件是否存在，不存在则新建一个
-        fs.access(dbPath, (err) => {
-            if (err) {
-                fs.writeFileSync(dbPath, '')
-                // 这里不能用读取文件的形式，因为读取的是反序列化后的list，而此时db为空，不是['abc']这种形式，会报错
-                // 所以这里直接用数组形式
-                const list = []
-                addContent(list, content)
-                save(list)
-                display(list)
 
-            } else {
-                list = fetch()
-                // 把task数组添加进list列表中 因为list是数组，所以只有数组能push进去，字符串不行
-                addContent(list, content)  //将每次存进list的数据后加上 未完成
-                save(list)
+        addContent(list, content)  //将每次存进list的数据后加上 未完成
 
-                display(list)
-            }
-        });
+
         break;
     case 'done':
-        list = fetch()
+
         //content就是我们输入的 node todo delete 1 的这个1
         markContentDone(list, content)
-        display(list)
-        save(list)
+
+
         break;
     case 'delete':
-        list = fetch()
+
         //content就是我们输入的 node todo delete 1 的这个1 
         removeContent(list, content)
-        display(list)
-        save(list)
+
+
         break;
     case 'edit':
-        list = fetch()
+
         //content就是我们输入的 node todo delete 1 的这个1
         //content2就是我们输入的第二个参数
         editContent(list, content, content2)
-        display(list)
-        save(list)
+
+
         break;
     case 'list':
-        list = fetch()
-        display(list)
+
+
         break;
     default:
         console.log('你想干什么？')
         break;
 }
+
+// 执行完操作后对list数据进行展示
+display(list)
+// 执行完操作后对list数据进行保存
+if (verb !== 'list') {  //因为list操作只是展示，不需要保存
+    save(list)
+}
+
