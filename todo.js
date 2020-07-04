@@ -1,5 +1,6 @@
 
-var fs = require('fs'); //file system 文件系统 声明后可以进行文件读写操作
+//file system 文件系统 声明后可以进行文件读写操作
+var fs = require('fs');
 
 // verb 操作名称   process.argv就是获取node的内容
 // process.argv[0]是node.exe的安装目录
@@ -12,15 +13,54 @@ const content = process.argv[3]
 const content2 = process.argv[4]
 
 
-
-
-// 优化重复代码部分
-
 // 注意这里路径要用\\ 因为\是字符转义，会让路径出错，所以要用\\表示\
 // db 数据库  是没有后缀的
 // Sync是同步的意思  writeFileSync就是以同步的方式写入文件（没有则新建一个文件）
 const dbPath = 'D:\\VSCodeProject\\Node-demo\\db'
 
+
+//提前声明，防止后面重复声明list
+//提前运行fetch()函数，读取数据给list，减少每项操作的重复动作
+const list = fetch()
+
+switch (verb) {
+    case 'add':
+        addContent(list, content)  //将每次存进list的数据后加上 未完成
+        break;
+    case 'done':
+        //content就是我们输入的 node todo delete 1 的这个1
+        markContentDone(list, content)
+        break;
+    case 'delete':
+        removeContent(list, content)
+        break;
+    case 'edit':
+        //content2就是我们输入的第二个参数
+        editContent(list, content, content2)
+        break;
+    case 'list':
+        break;
+    default:
+        console.log('你想干什么？')
+        break;
+}
+
+// 执行完操作后对list数据进行展示
+display(list)
+// 执行完操作后对list数据进行保存
+if (verb !== 'list') {  //因为list操作只是展示，不需要保存
+    save(list)
+}
+
+
+
+
+
+
+
+
+
+// 优化重复代码部分
 
 
 // 保存到数据库db
@@ -85,56 +125,3 @@ try {
     fs.writeFileSync(dbPath, '')
 }
 // 运行完try之后，db文件必定已经存在
-
-
-//提前声明，防止后面重复声明list
-//提前运行fetch()函数，读取数据给list，减少每项操作的重复动作
-const list = fetch()
-
-
-
-switch (verb) {
-    case 'add':
-
-        addContent(list, content)  //将每次存进list的数据后加上 未完成
-
-
-        break;
-    case 'done':
-
-        //content就是我们输入的 node todo delete 1 的这个1
-        markContentDone(list, content)
-
-
-        break;
-    case 'delete':
-
-        //content就是我们输入的 node todo delete 1 的这个1 
-        removeContent(list, content)
-
-
-        break;
-    case 'edit':
-
-        //content就是我们输入的 node todo delete 1 的这个1
-        //content2就是我们输入的第二个参数
-        editContent(list, content, content2)
-
-
-        break;
-    case 'list':
-
-
-        break;
-    default:
-        console.log('你想干什么？')
-        break;
-}
-
-// 执行完操作后对list数据进行展示
-display(list)
-// 执行完操作后对list数据进行保存
-if (verb !== 'list') {  //因为list操作只是展示，不需要保存
-    save(list)
-}
-
