@@ -15,8 +15,21 @@ const content2 = process.argv[4]
 
 // 注意这里路径要用\\ 因为\是字符转义，会让路径出错，所以要用\\表示\
 // db 数据库  是没有后缀的
-// Sync是同步的意思  writeFileSync就是以同步的方式写入文件（没有则新建一个文件）
-const dbPath = 'D:\\VSCodeProject\\Node-demo\\db'
+
+//设置路径的两种方法
+//手动设置死路径
+// const dbPath = 'D:\\VSCodeProject\\Node-demo\\db'  
+
+// 将路径设置为当前项目的路径
+var path = require('path')
+const dbPath = path.join(__dirname, 'db')  //__dirnanme就是当前路径的意思
+// path.join()就是将里面的连在一起
+// 在windows系统中，会用 \\ 连接
+// 其他系统中，会用 / 连接
+
+
+
+
 
 
 //提前声明，防止后面重复声明list
@@ -69,6 +82,7 @@ function save(list) {
     // 之所以要把数组序列化为字符串，是因为如果不序列化，而是使用list.toString()存入db文件,那文件中的就是个单纯的字符串
     // 序列化后的存入的则是、数组的样式的字符串
     // list.toString()——>工作1    JSON.stringify(list)——>['工作1']
+    // Sync是同步的意思  writeFileSync就是以同步的方式写入文件（没有则新建一个文件）
     fs.writeFileSync(dbPath, JSON.stringify(list)) //保存到数据库
 }
 
@@ -91,7 +105,11 @@ function fetch() {
 
 // 展示list清单
 function display(list) {
-    console.log(list) // 打印出list清单
+    for (let i = 0; i < list.length; i++) {
+        const flag = list[i][1] === '已完成' ? '[x]' : '[_]'
+        console.log('任务状态：' + flag + ' ' + '任务内容：' + list[i][0]) // 打印出list清单
+    }
+
 }
 
 // 向list中添加数据
