@@ -33,7 +33,7 @@ const dbPath = path.join(__dirname, 'db')  //__dirnanme就是当前路径的意�
 
 
 //提前声明，防止后面重复声明list
-//提前运行fetch()函数，读取数据给list，减少每项操作的重复动作
+//提前运行fetch()函数，读取数据给list，减少每项操作重复动作
 const list = fetch()
 
 switch (verb) {
