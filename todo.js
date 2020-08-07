@@ -59,6 +59,7 @@ switch (verb) {
 }
 
 // 执行完操作后对list数据进行展示
+// 通过封装好的函数，进行便捷的操作
 display(list)
 // 执行完操作后对list数据进行保存
 if (verb !== 'list') {  //因为list操作只是展示，不需要保存
